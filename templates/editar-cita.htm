@@ -1,0 +1,59 @@
+<div class="container-fluid">
+	
+	<div class="row">
+		
+		<div class="col-md-6 col-md-offset-3">
+
+			<h2 class="sub-header">Editar Cita</h2>
+
+			<form class="form-horizontal" ng-submit="false">
+			 	<div class="form-group">
+			    	<label for="nameCliente" class="col-sm-3 control-label">Nombre de cliente</label>
+			    	<div class="col-sm-9">
+			    		<input ng-model="cita.fields.NombreCliente" type="text" class="form-control" id="nameCliente" placeholder="Nombre">
+			    	</div>
+			  	</div>
+				<div class="form-group">
+			    	<label for="servicio" class="col-sm-3 control-label">Servicio</label>
+			    	<div class="col-sm-9">
+				    	<select name="servicio" class="form-control">
+						  <option value="lavado">Lavado</option>
+						  <option value="mantenimiento">Mantenimiento</option>
+						</select>
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<label for="vehiculo" class="col-sm-3 control-label">Vehículo</label>
+			    	<div class="col-sm-9">
+			      		<input type="email" class="form-control" id="vehiculo" placeholder="">
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<label for="fechaDeCita" class="col-sm-3 control-label">Fecha</label>
+			    	<div class="col-sm-9">
+				    	<select name="fechaDeCita" class="form-control">
+						  <option value="lavado">Lavado</option>
+						  <option value="mantenimiento">Mantenimiento</option>
+						</select>
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<label for="horaDeCita" class="col-sm-3 control-label">Hora</label>
+			    	<div class="col-sm-9">
+				    	<select name="horaDeCita" class="form-control">
+						  <option value="lavado">Lavado</option>
+						  <option value="mantenimiento">Mantenimiento</option>
+						</select>
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<div class="col-sm-offset-2 col-sm-10">
+			      		<button type="submit" class="btn btn-default">Guardar</button>
+			    	</div>
+			  	</div>
+			</form>		
+		</div>
+
+	</div>
+
+</div>

@@ -1,0 +1,112 @@
+<div class="container-fluid">
+	
+	<div class="row">
+		
+		<div class="col-md-6 col-md-offset-3">
+
+			<h2 class="sub-header">Editar Cliente</h2>
+
+			<form class="form-horizontal" ng-submit="add()">
+			 	<div class="form-group">
+			    	<label for="nameCliente" class="col-sm-3 control-label">Nombre de cliente</label>
+			    	<div class="col-sm-9">
+			    		<input ng-model="cliente.fields.Nombre" required type="text" class="form-control" id="nameCliente">
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<label for="emailCliente" class="col-sm-3 control-label">Email</label>
+			    	<div class="col-sm-9">
+			    		<input ng-model="cliente.fields.Email" required type="email" class="form-control" id="emailCliente" placeholder="Email">
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<label for="fechanacimCliente" class="col-sm-3 control-label">Fecha nacimiento</label>
+			    	<div class="col-sm-9">
+			    		<input ng-model="cliente.fields.FechaNacimiento" required type="date" class="form-control" id="fechanacimCliente" placeholder="Fecha de nacimiento">
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<label for="telCliente" class="col-sm-3 control-label">Teléfono</label>
+			    	<div class="col-sm-9">
+			    		<input ng-model="cliente.fields.Telefono" required type="tel" class="form-control" id="telCliente" placeholder="Teléfono">
+			    	</div>
+			  	</div>
+			  	<div class="form-group">
+			    	<label for="vehiculos" class="col-sm-3 control-label">Vehículos</label>
+			    	<div class="col-sm-9">
+
+			    		<div class="table-responsive" ng-hide="agregandoVehiculo">
+							<table class="table table-striped table-hover">
+								<thead>
+									<tr>
+										<th>Modelo</th>
+										<th>Marca</th>
+										<th>Año</th>
+										<th>Kilometraje</th>
+										<th>Placa</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="vehiculo in vehiculos"> 
+										<td>{{vehiculo.fields.Modelo}}</td>
+										<td>{{vehiculo.fields.Marca}}</td>
+										<td>{{vehiculo.fields.Anno}}</td>
+										<td>{{vehiculo.fields.KilometrajeActual}}</td>
+										<td>{{vehiculo.fields.Placa}}</td>
+									</tr>
+									<tr><td><button class="btn btn-success" ng-click="agregandoVehiculo=true">Agregar Vehículo</button></td></tr>
+								</tbody>
+							</table>
+						</div>
+			    	</div>
+			  	</div>
+			  	<div class="form-group" ng-hide="agregandoVehiculo">
+			    	<div class="col-sm-offset-3 col-sm-9">
+			      		<button type="submit" class="btn btn-default">Guardar Cliente</button>
+			    	</div>
+			  	</div>
+			</form>	
+			<div class="col-sm-offset-3 col-sm-9">
+				<form class="form-horizontal" ng-submit="addVehiculo()" ng-show="agregandoVehiculo">
+				 	<div class="form-group">
+				    	<label for="ModeloVehiculo" class="col-sm-3 control-label">Modelo</label>
+				    	<div class="col-sm-9">
+				    		<input ng-model="nuevoVehiculo.Modelo" required type="text" class="form-control" id="ModeloVehiculo">
+				    	</div>
+				  	</div>
+				  	<div class="form-group">
+				    	<label for="MarcaVehiculo" class="col-sm-3 control-label">Marca</label>
+				    	<div class="col-sm-9">
+				    		<input ng-model="nuevoVehiculo.Marca" required type="text" class="form-control" id="MarcaVehiculo">
+				    	</div>
+				  	</div>
+				  	<div class="form-group">
+				    	<label for="AnnoVehiculo" class="col-sm-3 control-label">Año</label>
+				    	<div class="col-sm-9">
+				    		<input ng-model="nuevoVehiculo.Anno" required type="number" class="form-control" id="AnnoVehiculo">
+				    	</div>
+				  	</div>
+				  	<div class="form-group">
+				    	<label for="KilometrajeVehiculo" class="col-sm-3 control-label">Kilometraje</label>
+				    	<div class="col-sm-9">
+				    		<input ng-model="nuevoVehiculo.KilometrajeActual" required type="text" class="form-control" id="KilometrajeVehiculo">
+				    	</div>
+				  	</div>
+				  	<div class="form-group">
+				    	<label for="PlacaVehiculo" class="col-sm-3 control-label">Placa</label>
+				    	<div class="col-sm-9">
+				    		<input ng-model="nuevoVehiculo.Placa" required type="text" class="form-control" id="PlacaVehiculo">
+				    	</div>
+				  	</div>
+				  	<div class="form-group">
+				    	<div class="col-sm-offset-3 col-sm-9">
+				      		<button type="submit" class="btn btn-default">GuardarVehiculo</button>
+				    	</div>
+				  	</div>
+				</form>
+			</div>
+		</div>
+
+	</div>
+
+</div>

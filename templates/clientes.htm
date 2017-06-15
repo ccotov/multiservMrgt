@@ -1,0 +1,33 @@
+<div class="container-fluid">
+	
+	<div class="row">
+		<div class="col-md-12">
+		<a href="#/cliente/agregar" class="btn btn-success pull-right button-header">Agregar Cliente</a>
+			<h2 class="sub-header">Clientes</h2>
+		</div>
+	</div>
+
+<div class="table-responsive">
+	<table class="table table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Teléfono</th>
+				<th>Nombre</th>
+				<th>Email</th>
+				<th>Fecha nacimiento</th>
+				<th>Editar</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="cliente in Clientes"> 
+				<td>{{cliente.Telefono}}</td>
+				<td>{{cliente.Nombre}}</td>
+				<td>{{cliente.Email}}</td>
+				<td>{{cliente.FechaNacimiento | date : 'dd/MM/yyyy'}}</td>
+				<td>
+					<a href="#/cliente/{{cliente.id}}" class="btn btn-link"><span class="glyphicon glyphicon-pencil btn-separator""></span></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
