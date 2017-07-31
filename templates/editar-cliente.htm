@@ -6,7 +6,7 @@
 
 			<h2 class="sub-header">Editar Cliente</h2>
 
-			<form class="form-horizontal" ng-submit="add()">
+			<form class="form-horizontal" ng-submit="editar(cliente)">
 			 	<div class="form-group">
 			    	<label for="nameCliente" class="col-sm-3 control-label">Nombre de cliente</label>
 			    	<div class="col-sm-9">
@@ -40,9 +40,11 @@
 								<thead>
 									<tr>
 										<th>Modelo</th>
-										<th>Marca</th>
+										<div class="col-md-offset-3">
+											<th>Marca</th>
+										</div>
 										<th>Año</th>
-										<th>Kilometraje</th>
+										<th>Frecuenc cambio aceite</th>
 										<th>Placa</th>
 									</tr>
 								</thead>
@@ -51,7 +53,7 @@
 										<td>{{vehiculo.fields.Modelo}}</td>
 										<td>{{vehiculo.fields.Marca}}</td>
 										<td>{{vehiculo.fields.Anno}}</td>
-										<td>{{vehiculo.fields.KilometrajeActual}}</td>
+										<td>{{vehiculo.fields.FrecuenciaCambioAceite}}</td>
 										<td>{{vehiculo.fields.Placa}}</td>
 									</tr>
 									<tr><td><button class="btn btn-success" ng-click="agregandoVehiculo=true">Agregar Vehículo</button></td></tr>
@@ -87,9 +89,9 @@
 				    	</div>
 				  	</div>
 				  	<div class="form-group">
-				    	<label for="KilometrajeVehiculo" class="col-sm-3 control-label">Kilometraje</label>
+				    	<label for="FrecuenciaCambioAceite" class="col-sm-3 control-label">Frecuencia Cambio Aceite</label>
 				    	<div class="col-sm-9">
-				    		<input ng-model="nuevoVehiculo.KilometrajeActual" required type="text" class="form-control" id="KilometrajeVehiculo">
+				    		<input ng-model="nuevoVehiculo.FrecuenciaCambioAceite" required type="number" class="form-control" id="FrecuenciaCambioAceite">
 				    	</div>
 				  	</div>
 				  	<div class="form-group">

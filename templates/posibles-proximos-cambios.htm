@@ -1,1 +1,15 @@
-<p>Posibles Proximos Cambios</p>
+<div class="container-fluid">
+	
+	<div class="row">
+		<div class="col-md-12">
+			<h2 class="sub-header">Posibles Próximos Cambios de Aceite</h2>
+		</div>
+	</div>
+
+	<form class="form-horizontal" ng-submit="editar(cliente)">
+		<div class="form-group">
+	    	<label for="fechanacimCliente" class="col-sm-3 control-label">Fecha de semana a buscar</label>
+	    	<div class="col-sm-9">
+	    		<input ng-model="cliente.fields.FechaNacimiento" required type="date" class="form-control" id="fechanacimCliente" placeholder="Fecha de nacimiento">
+	    	</div>
+	  	</div>

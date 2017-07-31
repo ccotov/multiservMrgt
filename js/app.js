@@ -27,6 +27,10 @@ app.config(function($routeProvider) {
         templateUrl : "templates/formulario-cita.htm",
         controller: "CitaCtrl"
     })
+    .when("/citas/completar/:id", {
+        templateUrl : "templates/completar-cita.htm",
+        controller: "CitaCtrl"
+    })
     .when("/citas/agregar", {
         templateUrl : "templates/formulario-cita.htm",
         controller: "CitaCtrl"
@@ -96,7 +100,7 @@ app.service('VehiculosService', ['AirtableService', function(AirtableService) {
             "Modelo": vehiculo.Modelo,
             "Marca": vehiculo.Marca,
             "Anno": vehiculo.Anno,
-            "Kilometraje": vehiculo.Kilometraje,
+            "FrecuenciaCambioAceite": vehiculo.FrecuenciaCambioAceite,
             "Placa": vehiculo.Placa
         });
     }
@@ -145,7 +149,7 @@ app.service('ClientesService', ['AirtableService', function(AirtableService) {
         });
     }
 
-}]);
+}]); // fin de Clientes Service
 
 app.service('CitasService', ['AirtableService', function(AirtableService) {
     this.getAll = function() {
@@ -180,12 +184,23 @@ app.service('CitasService', ['AirtableService', function(AirtableService) {
 
         var base = AirtableService.getBase();
         
-        return base('Citas').destroy(cita, function (err, deletedCita) {
-            if (err) { console.error(err); return; }
-                console.log('Deleted cita', deletedCita.id);
+        return base('Citas').destroy(cita);
+    };
+
+    this.add = function(cita) {
+
+        var base = AirtableService.getBase();
+
+        return base('Citas').create({
+            "Fecha": cita.fecha,
+            "Comentarios": cita.Comentarios,
+            "Cliente": [cita.Cliente.id],
+            "Vehiculo": [cita.Vehiculo.id],
+            "TipoServicio": [cita.TipoServicio]
         });
     };
-}]);
+
+}]); // fin de Citas Service
 
 app.service('ServiciosService', ['AirtableService', function(AirtableService) {
         this.getAll = function() {
@@ -195,7 +210,7 @@ app.service('ServiciosService', ['AirtableService', function(AirtableService) {
         return base('Servicios').select({
         }).all();
     };
-}]);
+}]); // fin de Servicios Service
 
 app.controller('InicioSesionCtrl', ['$scope', function ($scope) {
 
@@ -203,7 +218,7 @@ app.controller('InicioSesionCtrl', ['$scope', function ($scope) {
 app.controller('InicioCtrl', ['$scope', function ($scope) {
 
 }]);
-app.controller('CitasCtrl', ['$scope', 'CitasService', function ($scope, CitasService) {
+app.controller('CitasCtrl', ['$scope', 'CitasService', '$location', '$route', function ($scope, CitasService, $location, $route) {
 	$scope.citaABorrar = [];
     $scope.citaAEditar = [];
     $scope.citas = [];
@@ -217,16 +232,20 @@ app.controller('CitasCtrl', ['$scope', 'CitasService', function ($scope, CitasSe
 
     $scope.eliminar = function(cita) {
         $scope.citaABorrar = cita;
-        var confirmBorrar = confirm("Está seguro que desea borrar?");
+        var confirmBorrar = confirm("Está seguro que desea borrar la cita?");
         if (confirmBorrar) {
             console.log(cita.id);
-            CitasService.borrar(cita.id);
-            alert("Cita eliminada");
+            CitasService.borrar(cita.id).then(function(){
+                alert("Cita eliminada");
+                $route.reload();  
+            });
         }
-        getAll();
+        
+        //CitasService.getAll();
+        //$scope.$apply();
     }
 
-}]);
+}]); // fin de Citas Ctrl
 
 app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'ServiciosService', 'VehiculosService', '$route', '$routeParams', '$rootScope', '$location', 
     function ($scope, ClientesService, CitasService, ServiciosService, VehiculosService, $route, $routeParams, $rootScope, $location) {
@@ -279,12 +298,12 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
     $scope.cargarCita = function() { 
         CitasService.getById(param).then(function(value) {
             var fechaFormat = new Date(value.fields.Fecha);
-            value.fields.Fecha = fechaFormat; //fechaFormat.getFullYear()+'/'+(fechaFormat.getMonth()+1)+'/'+fechaFormat.getDate();
+            value.fields.Fecha = fechaFormat;
             value.fields.TipoServicio = value.fields.TipoServicio[0];
             $scope.HoraActual = fechaFormat.getHours() +':'+ ('0'+fechaFormat.getMinutes()).slice(-2);
+            $scope.FechaNormal = fechaFormat.getDate()+'/'+(fechaFormat.getMonth()+1)+'/'+fechaFormat.getFullYear();
             $scope.horaNueva = $scope.HoraActual;
             $scope.cita = value;
-            console.log($scope.cita.fields.Fecha);
             $scope.$apply();
             $scope.cargarHoras($scope.cita.fields.Fecha);
         });
@@ -342,22 +361,31 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
         }
     }
 
-    $scope.add = function() {
+    $scope.add = function(pCompletar) {
         var horas = $scope.horaNueva.split(':')[0];
         var minutos = $scope.horaNueva.split(':')[1];
-        
         if (param) {
             $scope.cita.fields.Fecha.setHours(horas,minutos,0,0);
             delete $scope.cita.fields.NombreCliente;
             delete $scope.cita.fields.DetalleVehiculo;
             delete $scope.cita.fields.Tipo;
             $scope.cita.fields.TipoServicio = [$scope.cita.fields.TipoServicio];
-            //console.log($scope.cita);
+            if (pCompletar) {
+                $scope.cita.fields.TrabajoRealizado = pCompletar;
+            }
             $scope.cita.save();
-            $location.path( '/citas' );
+            console.log('Cita guardada!');
         } else {
+            $scope.citaNueva.fecha.setHours(horas,minutos,0,0);
             console.log($scope.citaNueva);
+            CitasService.add($scope.citaNueva).then(function(value){
+                if (value.id) {
+                    console.log("Cita agregada con éxito");
+                }
+                console.log(value);
+            });
         }
+        $location.path( '/citas' );
     }
 
     $scope.cambioFecha = function(pfecha) {
@@ -365,7 +393,13 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
         $scope.cargarHoras(pfecha);
 
     }
-}]);    
+
+    $scope.completarCita = function() {
+        $scope.add(true);
+        console.log($scope.cita);
+    }
+
+}]);   // fin de Cita Ctrl
 
 app.controller('DetalleCitaCtrl', ['$scope', function ($scope) {
 
@@ -391,9 +425,6 @@ app.controller('ClienteCtrl', ['$scope', 'ClientesService', function ($scope, Cl
         }
     }
 
-    $scope.guardar = function(cliente) {
-
-    }
 }]);
 
 app.controller('AgregarClienteCtrl', ['$scope', 'ClientesService', '$location', function ($scope, ClientesService, $location) {
@@ -419,12 +450,14 @@ app.controller('EditarClienteCtrl', ['$scope', 'ClientesService', 'VehiculosServ
     $scope.nuevoVehiculo = {};
     $scope.agregandoVehiculo = false;
     var param = $routeParams.id;
+
     ClientesService.getById(param).then(function(value){
         value.fields.FechaNacimiento = new Date(value.fields.FechaNacimiento);
         $scope.cliente = value;
         $scope.$apply();
         $scope.cargarVehiculos();
     });
+
     $scope.addVehiculo = function() {
         $scope.nuevoVehiculo.clienteid = $scope.cliente.id;
         VehiculosService.add($scope.nuevoVehiculo).then(function(value){
@@ -436,16 +469,30 @@ app.controller('EditarClienteCtrl', ['$scope', 'ClientesService', 'VehiculosServ
            $scope.$apply();
         });
     }
+
     $scope.cargarVehiculos = function() {
         VehiculosService.getAll($scope.cliente.fields.Cliente).then(function(value){
             $scope.vehiculos = value;
             $scope.$apply();
         });
     }
+
+    $scope.editar = function() {
+        //$scope.cliente.fields.Fecha.setHours(horas,minutos,0,0);
+        delete $scope.cliente.fields.Cliente;
+        console.log($scope.cliente);
+        //var fechaFormat = new Date($scope.cliente.fields.FechaNacimiento);
+        //$scope.cliente.fields.FechaNacimiento = fechaFormat.getFullYear()+'-'+
+        //            ('0'+(fechaFormat.getMonth()+1)).slice(-2)+'-'+('0'+fechaFormat.getDate()).slice(-2);
+        $scope.cliente.save();
+        //$scope.$apply();
+        //console.log($scope.cliente);
+    }
+
 }]);    
 
 app.controller('PosiblesProximosCambiosCtrl', ['$scope', function ($scope) {
-
+    
 }]);
 app.controller('ReportesCtrl', ['$scope', function ($scope) {
 
