@@ -162,14 +162,14 @@ app.service('CitasService', ['AirtableService', function(AirtableService) {
     };
 
     this.getByDate = function (fecha) {
-
+        console.log(fecha);
         var base = AirtableService.getBase();
 
         var date = (new Date(fecha)).toISOString().split('T')[0];
 
         return base('Citas').select({
-            view: 'Grid view',
-            filterByFormula: '({Fecha} > "'+date+'T00:00:00.000Z" & {Fecha} < "'+date+'T23:59:00.000Z" )'
+            view: 'Grid view', 
+            filterByFormula: 'AND( IS_AFTER(Fecha, "'+date+'T00:00:00.000Z"), IS_BEFORE(Fecha, "'+date+'T23:59:00.000Z" ))'
         }).all();
     }
 
@@ -178,6 +178,19 @@ app.service('CitasService', ['AirtableService', function(AirtableService) {
         var base = AirtableService.getBase();
         
         return base('Citas').find(id);
+    }
+
+    this.getBeforeToday = function () {
+
+        var base = AirtableService.getBase();
+        var today = (new Date());
+        
+        var query = 'AND(IS_BEFORE(Fecha, "'+today+'"), TrabajoRealizado=1)';
+        
+        return base('Citas').select({
+          view: 'Grid view',
+          filterByFormula: query
+        }).all();
     }
 
     this.borrar = function(cita) {
@@ -324,7 +337,7 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
     }
 
     $scope.cargarHoras = function(pfecha) {
-        CitasService.getByDate(pfecha).then(function(value){
+        CitasService.getByDate(pfecha).then(function(value){ debugger
             value.forEach(function(item, index){
                 var fechaCompl = new Date(item.fields.Fecha);
                 var hora = fechaCompl.getHours() +':'+ ('0'+fechaCompl.getMinutes()).slice(-2);
@@ -389,6 +402,7 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
     }
 
     $scope.cambioFecha = function(pfecha) {
+        console.log(pfecha);
         $scope.crearHoras();
         $scope.cargarHoras(pfecha);
 
@@ -491,8 +505,67 @@ app.controller('EditarClienteCtrl', ['$scope', 'ClientesService', 'VehiculosServ
 
 }]);    
 
-app.controller('PosiblesProximosCambiosCtrl', ['$scope', function ($scope) {
+app.controller('PosiblesProximosCambiosCtrl', ['$scope', 'CitasService', function ($scope, CitasService) {
+    $scope.resultado = [];
+    var citasRecurrentes = {};
+    var single;
+    var multiple;
+    var placa;
+    var tempCitas; 
     
+    $scope.generarLista = function() {
+        citasRecurrentes = {};
+        single = [];
+        multiple = [];
+        tempCitas = {};
+        console.log("generarLista");
+        CitasService.getBeforeToday().then(function(value){
+            value.forEach(function(item, index){
+                placa = item.fields.placa[0];
+                if (single.indexOf(placa) === -1) {
+                    single.push(placa);
+                    tempCitas[placa] = item;
+                } else {
+                    if (multiple.indexOf(placa) === -1) {
+                        multiple.push(placa);
+                        citasRecurrentes[ placa ] = [];
+                        citasRecurrentes[ placa ].push(tempCitas[placa]);
+                    } 
+                    citasRecurrentes[ placa ].push(item);
+                }
+            });
+
+            var citas;
+            var promedios;
+            var timeDiff;
+            var promedioCambio;
+            var proximaFecha;
+
+            multiple.forEach(function(placa, i) {
+                promedios = 0;
+                citas = citasRecurrentes[placa];
+                citas.forEach(function(cita, j) {
+                    if ( (j+1) < citas.length ) {
+                        timeDiff = Math.abs((new Date (citas[j+1].fields.Fecha)).getTime() - (new Date(cita.fields.Fecha)).getTime());
+                        promedios+= (timeDiff / (1000 * 3600 * 24));
+                    }
+                });
+                promedioCambio = Math.ceil(promedios/(citas.length-1));
+                console.log(promedioCambio);
+                proximaFecha = new Date( (new Date()).getTime() + (promedioCambio * 24 * 3600 * 1000) );
+
+                $scope.resultado.push( {
+                    proximaFecha: proximaFecha,
+                    clienteID : citas[0].fields.Cliente,
+                    vehiculoID : citas[0].fields.Vehiculo
+                });
+
+            });
+
+
+            $scope.$apply();
+        });
+    }
 }]);
 app.controller('ReportesCtrl', ['$scope', function ($scope) {
 
