@@ -6,14 +6,14 @@
 
 			<h2 class="sub-header">{{ citaNueva ? 'Agregar Cita' : 'Editar Cita'}}</h2>
 
-			<form class="form-horizontal" ng-submit="add()">
+			<form class="form-horizontal" name="citaForm" ng-submit="add()">
 			 	<div class="form-group">
 			    	<label for="nameCliente" class="col-sm-3 control-label">Nombre de cliente</label>
 			    	<div class="col-sm-9">
 			    		<p ng-if="!citaNueva">{{cita.fields.NombreCliente[0]}}</p>
 			    		<input ng-if="citaNueva" type="text" ng-model="citaNueva.Cliente" 
 			    		typeahead="cliente as cliente.fields.Cliente for cliente in listaClientes | filter:{fields:$viewValue}" 
-			    		class="form-control"
+			    		class="form-control" required
 			    		typeahead-on-select="cargarVehiculos()">
 			    	</div>
 			  	</div>
@@ -21,18 +21,17 @@
 			    	<label for="vehiculo" class="col-sm-3 control-label">Vehículo</label>
 			    	<div class="col-sm-9">
 			    		<p ng-if="!citaNueva">{{cita.fields.DetalleVehiculo[0]}}</p>
-			    		<select ng-if="citaNueva" ng-options="vehiculo as vehiculo.fields.Vehiculo for vehiculo in listaVehiculos" class="form-control" ng-model="citaNueva.Vehiculo"></select>
+			    		<select ng-if="citaNueva" ng-options="vehiculo as vehiculo.fields.Vehiculo for vehiculo in listaVehiculos" class="form-control" required ng-model="citaNueva.Vehiculo"></select>
 			    	</div>
 			  	</div>
 				<div class="form-group">
 			    	<label for="servicio" class="col-sm-3 control-label">Servicio</label>
 			    	<div class="col-sm-9">
-				    	<select name="servicio" ng-if="!citaNueva" class="form-control" ng-model="cita.fields.TipoServicio">
-						  <option ng-repeat="servicio in servicios" ng-selected="servicio.fields.Nombre==cita.fields.Tipo" value="{{servicio.id}}">{{servicio.fields.Nombre}}</option>
+				    	<select name="servicioCitaEditar" ng-if="!citaNueva" class="form-control" ng-model="cita.fields.TipoServicio">
+						  <option ng-repeat="servicio in servicios" ng-selected="servicio.fields.Nombre==cita.fields.Tipo" required value="{{servicio.id}}">{{servicio.fields.Nombre}}</option>
 						</select>
 				    	<select name="servicio" ng-if="citaNueva" class="form-control" ng-model="citaNueva.TipoServicio">
-				    	  <option value="Tipo">Tipo de Servicio</option>
-						  <option ng-repeat="servicio in servicios" ng-selected="servicio.fields.Nombre==cita.fields.Tipo" value="{{servicio.id}}">{{servicio.fields.Nombre}}</option>
+						  <option ng-repeat="servicio in servicios" ng-selected="servicio.fields.Nombre==cita.fields.Tipo" required value="{{servicio.id}}">{{servicio.fields.Nombre}}</option>
 						</select>
 			    	</div>
 			  	</div>
@@ -46,22 +45,24 @@
 			  	<div class="form-group">
 			    	<label for="fechaDeCita" class="col-sm-3 control-label">Fecha</label>
 			    	<div class="col-sm-9">
-			    		<input ng-if="!citaNueva" ng-model="cita.fields.Fecha" required type="date" class="form-control" id="fechaDeCita" ng-change="cambioFecha(cita.fields.Fecha)">
-			    		<input ng-if="citaNueva" ng-model="citaNueva.fecha" required type="date" class="form-control" id="fechaDeCita" ng-change="cambioFecha(citaNueva.fecha)" placeholder="Fecha de Cita">
+			    		<input ng-if="!citaNueva" ng-model="cita.fields.Fecha" required type="date" class="form-control" name="fechaCitaEditar" ng-change="cambioFecha(cita.fields.Fecha)">
+			    		<input ng-if="citaNueva" ng-model="citaNueva.fecha" required type="date" class="form-control" name="fechaCita" ng-change="cambioFecha(citaNueva.fecha)" placeholder="Fecha de Cita">
 			    	</div>
 			  	</div>
 			  	<div class="form-group">
 			    	<label for="horaDeCita" class="col-sm-3 control-label">Hora</label>
 			    	<div class="col-sm-9">
 				    	<select name="horaDeCita" class="form-control" ng-model="horaNueva">
-						  <option value="">Hora</option>
-						  <option ng-repeat="hora in horas" ng-selected="HoraActual===hora.hora" ng-show="hora.disponible" value="{{hora.hora}}">{{hora.hora}}</option>
+						  <option ng-repeat="hora in horas" ng-selected="HoraActual===hora.hora" required ng-show="hora.disponible" value="{{hora.hora}}">{{hora.hora}}</option>
 						</select>
 			    	</div>
 			  	</div>
 			  	<div class="form-group">
 			    	<div class="col-sm-offset-2 col-sm-10">
-			      		<button type="submit" class="btn btn-default">Guardar</button>
+			      		<button ng-show="citaNueva" ng-disabled="citaForm.$invalid || !citaForm.servicio.$dirty || !citaForm.horaDeCita.$dirty" type="submit" class="btn btn-default">Crear Cita</button>
+			    	</div>
+			    	<div class="col-sm-offset-2 col-sm-10">
+			      		<button ng-show="!citaNueva" type="submit" class="btn btn-default">Guardar Cita</button>
 			    	</div>
 			  	</div>
 			</form>		

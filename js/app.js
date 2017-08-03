@@ -53,10 +53,6 @@ app.config(function($routeProvider) {
         templateUrl : "templates/posibles-proximos-cambios.htm",
         controller: "PosiblesProximosCambiosCtrl"
     })
-    .when("/reportes", {
-        templateUrl : "templates/reportes.htm",
-        controller: "ReportesCtrl"
-    });
 });
 
 app.run([ '$rootScope', 'ServiciosService',function($rootScope, ServiciosService) {
@@ -162,7 +158,7 @@ app.service('CitasService', ['AirtableService', function(AirtableService) {
     };
 
     this.getByDate = function (fecha) {
-        console.log(fecha);
+        
         var base = AirtableService.getBase();
 
         var date = (new Date(fecha)).toISOString().split('T')[0];
@@ -247,7 +243,6 @@ app.controller('CitasCtrl', ['$scope', 'CitasService', '$location', '$route', fu
         $scope.citaABorrar = cita;
         var confirmBorrar = confirm("Está seguro que desea borrar la cita?");
         if (confirmBorrar) {
-            console.log(cita.id);
             CitasService.borrar(cita.id).then(function(){
                 alert("Cita eliminada");
                 $route.reload();  
@@ -337,7 +332,7 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
     }
 
     $scope.cargarHoras = function(pfecha) {
-        CitasService.getByDate(pfecha).then(function(value){ debugger
+        CitasService.getByDate(pfecha).then(function(value){
             value.forEach(function(item, index){
                 var fechaCompl = new Date(item.fields.Fecha);
                 var hora = fechaCompl.getHours() +':'+ ('0'+fechaCompl.getMinutes()).slice(-2);
@@ -381,16 +376,21 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
             $scope.cita.fields.Fecha.setHours(horas,minutos,0,0);
             delete $scope.cita.fields.NombreCliente;
             delete $scope.cita.fields.DetalleVehiculo;
+            delete $scope.cita.fields.placa;
             delete $scope.cita.fields.Tipo;
             $scope.cita.fields.TipoServicio = [$scope.cita.fields.TipoServicio];
             if (pCompletar) {
                 $scope.cita.fields.TrabajoRealizado = pCompletar;
             }
-            $scope.cita.save();
-            console.log('Cita guardada!');
+            $scope.cita.save().then(function(value){
+                if (value) {
+                  alert('Cita guardada!');
+                } else {
+                  console.log(value);
+                }
+            });
         } else {
             $scope.citaNueva.fecha.setHours(horas,minutos,0,0);
-            console.log($scope.citaNueva);
             CitasService.add($scope.citaNueva).then(function(value){
                 if (value.id) {
                     console.log("Cita agregada con éxito");
@@ -402,7 +402,6 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
     }
 
     $scope.cambioFecha = function(pfecha) {
-        console.log(pfecha);
         $scope.crearHoras();
         $scope.cargarHoras(pfecha);
 
@@ -410,7 +409,6 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
 
     $scope.completarCita = function() {
         $scope.add(true);
-        console.log($scope.cita);
     }
 
 }]);   // fin de Cita Ctrl
@@ -422,6 +420,7 @@ app.controller('DetalleCitaCtrl', ['$scope', function ($scope) {
 app.controller('ClienteCtrl', ['$scope', 'ClientesService', function ($scope, ClientesService) {
     $scope.citaAEditar = [];
     $scope.Clientes = [];
+
     ClientesService.getAll().then(function(value){
         value.forEach(function(item, index){
             item.fields.id = item.id;
@@ -433,7 +432,6 @@ app.controller('ClienteCtrl', ['$scope', 'ClientesService', function ($scope, Cl
     $scope.eliminar = function(cliente) {
         var confirmBorrar = confirm("Está seguro que desea borrar?");
         if (confirmBorrar) {
-            console.log(cliente.id);
             ClientesService.delete(cliente.id);
             alert("Cliente eliminado");
         }
@@ -443,6 +441,7 @@ app.controller('ClienteCtrl', ['$scope', 'ClientesService', function ($scope, Cl
 
 app.controller('AgregarClienteCtrl', ['$scope', 'ClientesService', '$location', function ($scope, ClientesService, $location) {
     $scope.cliente = {};
+    $scope.telRegex = '\\+*[\\d-\\s]{8,}';
 
     $scope.add = function() {
         $scope.cliente.Birthdate = $scope.cliente.FechaNacimiento.getFullYear()+'/'
@@ -463,6 +462,7 @@ app.controller('EditarClienteCtrl', ['$scope', 'ClientesService', 'VehiculosServ
     $scope.vehiculos = [];
     $scope.nuevoVehiculo = {};
     $scope.agregandoVehiculo = false;
+    $scope.telRegex = '\\+*[\\d-\\s]{8,}';
     var param = $routeParams.id;
 
     ClientesService.getById(param).then(function(value){
@@ -492,46 +492,60 @@ app.controller('EditarClienteCtrl', ['$scope', 'ClientesService', 'VehiculosServ
     }
 
     $scope.editar = function() {
-        //$scope.cliente.fields.Fecha.setHours(horas,minutos,0,0);
-        delete $scope.cliente.fields.Cliente;
-        console.log($scope.cliente);
-        //var fechaFormat = new Date($scope.cliente.fields.FechaNacimiento);
-        //$scope.cliente.fields.FechaNacimiento = fechaFormat.getFullYear()+'-'+
-        //            ('0'+(fechaFormat.getMonth()+1)).slice(-2)+'-'+('0'+fechaFormat.getDate()).slice(-2);
-        $scope.cliente.save();
-        //$scope.$apply();
-        //console.log($scope.cliente);
+        delete $scope.cliente.fields.Cliente; 
+        $scope.cliente.save().then(function(value){
+            if (value) {
+              alert('Cliente guardado!');  
+            } else {
+              console.log(value);
+            }
+        });;
     }
 
-}]);    
+}]); // fin de EditarClienteCtrl
 
-app.controller('PosiblesProximosCambiosCtrl', ['$scope', 'CitasService', function ($scope, CitasService) {
+app.controller('PosiblesProximosCambiosCtrl', ['$scope', 'CitasService', 'ClientesService', function ($scope, CitasService, ClientesService) {
     $scope.resultado = [];
+    $scope.isContenidoCargado = false;
     var citasRecurrentes = {};
     var single;
     var multiple;
     var placa;
     var tempCitas; 
-    
+    var listaClientes = {};
+
+    ClientesService.getAll().then(function(value) {
+        listaClientes = value;
+    });
+
     $scope.generarLista = function() {
         citasRecurrentes = {};
         single = [];
         multiple = [];
         tempCitas = {};
-        console.log("generarLista");
+        
         CitasService.getBeforeToday().then(function(value){
             value.forEach(function(item, index){
                 placa = item.fields.placa[0];
-                if (single.indexOf(placa) === -1) {
+                if ( single.indexOf(placa) === -1 ) {
                     single.push(placa);
                     tempCitas[placa] = item;
                 } else {
-                    if (multiple.indexOf(placa) === -1) {
+                    if ( multiple.indexOf(placa) === -1 ) {
                         multiple.push(placa);
                         citasRecurrentes[ placa ] = [];
                         citasRecurrentes[ placa ].push(tempCitas[placa]);
-                    } 
+                            
+                    }
                     citasRecurrentes[ placa ].push(item);
+                }
+            });
+
+            var index_placa;
+            multiple.forEach(function(item){
+                index_placa = single.indexOf(item);
+                if ( index_placa > -1 ) {
+                    single.splice(index_placa, 1);
                 }
             });
 
@@ -551,36 +565,45 @@ app.controller('PosiblesProximosCambiosCtrl', ['$scope', 'CitasService', functio
                     }
                 });
                 promedioCambio = Math.ceil(promedios/(citas.length-1));
-                console.log(promedioCambio);
                 proximaFecha = new Date( (new Date()).getTime() + (promedioCambio * 24 * 3600 * 1000) );
-
-                $scope.resultado.push( {
-                    proximaFecha: proximaFecha,
-                    clienteID : citas[0].fields.Cliente,
-                    vehiculoID : citas[0].fields.Vehiculo
+                
+                listaClientes.forEach(function(cliente) {
+                    if ( citas[0].fields.Cliente == cliente.id ) {
+                        $scope.resultado.push( {    
+                            proximaFecha : proximaFecha,
+                            promedioCambio : promedioCambio,
+                            nombreCliente : cliente.fields.Nombre,
+                            telefonoCliente : cliente.fields.Telefono,
+                            emailCliente : cliente.fields.Email,
+                            detalleVehiculo : citas[0].fields.DetalleVehiculo,
+                            placa : citas[0].fields.placa
+                        });
+                    }
                 });
-
             });
 
+            promedioCambio = 90;
+            single.forEach(function(placa, i) {
+                citas = tempCitas[placa];
+                proximaFecha = new Date( (new Date()).getTime() + (promedioCambio * 24 * 3600 * 1000) );
+                listaClientes.forEach(function(cliente) {
+                    if (citas.fields.Cliente[0] == cliente.id) {
+                        $scope.resultado.push( {    
+                            proximaFecha: proximaFecha,
+                            promedioCambio : promedioCambio,
+                            nombreCliente : cliente.fields.Nombre,
+                            telefonoCliente : cliente.fields.Telefono,
+                            emailCliente : cliente.fields.Email,
+                            detalleVehiculo : citas.fields.DetalleVehiculo,
+                            placa : citas.fields.placa
+                        });
+                    }
+                });
+            });
 
+            $scope.isContenidoCargado = true;
             $scope.$apply();
         });
-    }
-}]);
-app.controller('ReportesCtrl', ['$scope', function ($scope) {
+    } // fin de funcion generarLista
 
-}]);
-
-
-
-/*
-* Login
-* Lista de Cliente
-   - Agregar, Eliminar
-* Detalle de cita / Registro de Trabajo Realizado
-   - Editar o Eliminar
-   - Registrar Kilometraje, Comentarios
-* Posibles Próximos Cambios de Aceite
-   - Muestra posibles cambios de aceite para una fecha determinada
-* Reportes estadísticos
-*/
+}]); // fin de PosiblesProximosCambiosCtrl

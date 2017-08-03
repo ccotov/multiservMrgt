@@ -6,12 +6,30 @@
 		</div>
 	</div>
 	<a class="btn btn-success" href="" ng-click="generarLista()">Generar lista</a>
-	<pre>{{resultado|json}}</pre>
 
-	<form class="form-horizontal" ng-submit="editar(cliente)">
-		<div class="form-group">
-	    	<label for="fechanacimCliente" class="col-sm-3 control-label">Fecha de semana a buscar</label>
-	    	<div class="col-sm-9">
-	    		<input ng-model="cliente.fields.FechaNacimiento" required type="date" class="form-control" id="fechanacimCliente" placeholder="Fecha de nacimiento">
-	    	</div>
-	  	</div>
+<div class="table-responsive" ng-show="isContenidoCargado">
+	<table class="table table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Fecha Próximo Cambio</th>
+				<th>Días Promedio</th>
+				<th>Cliente</th>
+				<th>Teléfono</th>
+				<th>Email</th>
+				<th>Vehiculo</th>
+				<th>Placa</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="item in resultado">
+				<td>{{item.proximaFecha | date : 'dd/MM/yyyy'}}</td>
+				<td>{{item.promedioCambio}}</td>
+				<td>{{item.nombreCliente}}</td>
+				<td>{{item.telefonoCliente}}</td>
+				<td>{{item.emailCliente}}</td>
+				<td>{{item.detalleVehiculo[0]}}</td>
+				<td>{{item.placa[0]}}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

@@ -36,25 +36,19 @@
 					</button>
 					<a class="navbar-brand" href="#/">Multiservicios La Margoth</a>
 				</div>
-				<div id="navbar" class="navbar-collapse collapse">
-					<ul class="nav navbar-nav navbar-right">
-						<li><a href="#">Cerrar Sesi&oacute;n</a></li>
-					</ul>
-				</div>
 			</div>
 		</nav>
 
 		<div class="container-fluid">
-			<div class="row">
-				<div class="col-sm-3 col-md-2 sidebar">
+			<div class="row row-offcanvas row-offcanvas-left">
+			    <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation"">
 					<ul class="nav nav-sidebar">
 						<li><a href="#/citas">Citas</a></li>
 						<li><a href="#/clientes">Clientes</a></li>
 						<li><a href="#/posibles-proximos-cambios">Posibles Pr&oacute;ximos Cambios</a></li>
-						<li><a href="#/reportes">Reportes</a></li>
 					</ul>
 				</div>
-				<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+				<div class="col-xs-12 col-sm-9">
 					<ng-view>
 					</ng-view>
 				</div>
