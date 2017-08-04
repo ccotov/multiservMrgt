@@ -5,7 +5,7 @@ app.constant('AIRTABLE_KEY', 'keycS5NvHoRLPCVdl');
 app.config(function($routeProvider) {
     $routeProvider
     .when("/", {
-        redirectTo: "/inicio-sesion"
+        redirectTo: "/citas"
     })
     .when("/inicio-sesion", {
         templateUrl : "templates/inicio-sesion.htm",
@@ -149,7 +149,7 @@ app.service('ClientesService', ['AirtableService', function(AirtableService) {
 
 app.service('CitasService', ['AirtableService', function(AirtableService) {
     this.getAll = function() {
-		
+
 		var base = AirtableService.getBase();
 		
 		return base('Citas').select({
@@ -209,6 +209,17 @@ app.service('CitasService', ['AirtableService', function(AirtableService) {
         });
     };
 
+    this.ordenarCitas = function() {
+
+        var base = AirtableService.getBase();
+
+        return base('Citas').select({
+            sort: [
+                {field: 'Fecha', direction: 'desc'}
+            ],
+        }).all();
+    };
+
 }]); // fin de Citas Service
 
 app.service('ServiciosService', ['AirtableService', function(AirtableService) {
@@ -231,7 +242,7 @@ app.controller('CitasCtrl', ['$scope', 'CitasService', '$location', '$route', fu
 	$scope.citaABorrar = [];
     $scope.citaAEditar = [];
     $scope.citas = [];
-	CitasService.getAll().then(function(value){
+	CitasService.ordenarCitas().then(function(value){
 		value.forEach(function(item, index){
             item.fields.id = item.id;
 			$scope.citas.push(item.fields);
