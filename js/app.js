@@ -2,10 +2,10 @@ var app = angular.module("lubricentro", ["ui.bootstrap", "ngRoute"]);
 
 app.constant('AIRTABLE_KEY', 'keycS5NvHoRLPCVdl');
 
-app.config(function($routeProvider) {
+app.config(["$routeProvider", function($routeProvider) {
     $routeProvider
     .when("/", {
-        redirectTo: "/citas"
+        redirectTo: "/inicio-sesion"
     })
     .when("/inicio-sesion", {
         templateUrl : "templates/inicio-sesion.htm",
@@ -17,49 +17,86 @@ app.config(function($routeProvider) {
     })
     .when("/citas", {
         templateUrl : "templates/citas.htm",
-        controller: "CitasCtrl"
+        controller: "CitasCtrl",
+        authenticated: true
     })
     .when("/cita:id", {
         templateUrl : "templates/detalle-cita.htm",
-        controller: "DetalleCitaCtrl"
+        controller: "DetalleCitaCtrl",
+        authenticated: true
     })
     .when("/citas/editar/:id", {
         templateUrl : "templates/formulario-cita.htm",
-        controller: "CitaCtrl"
+        controller: "CitaCtrl",
+        authenticated: true
     })
     .when("/citas/completar/:id", {
         templateUrl : "templates/completar-cita.htm",
-        controller: "CitaCtrl"
+        controller: "CitaCtrl",
+        authenticated: true
     })
     .when("/citas/agregar", {
         templateUrl : "templates/formulario-cita.htm",
-        controller: "CitaCtrl"
+        controller: "CitaCtrl",
+        authenticated: true
     })
 
     .when("/clientes", {
         templateUrl : "templates/clientes.htm",
-        controller: "ClienteCtrl"
+        controller: "ClienteCtrl",
+        authenticated: true
     })
     .when("/cliente/agregar", {
-        templateUrl : "templates/agregar-cliente.htm",
-        controller: "AgregarClienteCtrl"
+        templateUrl : "templates/agregar-cliente.htm",  
+        controller: "AgregarClienteCtrl",
+        authenticated: true
     })
     .when("/cliente/:id", {
         templateUrl : "templates/editar-cliente.htm",
-        controller: "EditarClienteCtrl"
+        controller: "EditarClienteCtrl",
+        authenticated: true
     })
 
     .when("/posibles-proximos-cambios", {
         templateUrl : "templates/posibles-proximos-cambios.htm",
-        controller: "PosiblesProximosCambiosCtrl"
+        controller: "PosiblesProximosCambiosCtrl",
+        authenticated: true
     })
-});
+}]);
 
-app.run([ '$rootScope', 'ServiciosService',function($rootScope, ServiciosService) {
+app.run([ '$rootScope', 'ServiciosService', '$location', 'authFact', function($rootScope, ServiciosService, $location, authFact) {
     
+    
+
     ServiciosService.getAll().then(function(value){
         $rootScope.LISTA_SERVICIOS = value;
     });
+
+    $rootScope.$on('$routeChangeStart', function(event, next, current) {
+
+        if (next.$$route.authenticated) {
+            var userAuth = authFact.getAccessToken();
+            if (!userAuth) {
+                $location.path('/');
+            }
+        }
+
+    }); 
+
+}]);
+
+app.factory ('authFact', [function() {
+    var authFact = {};
+    
+    authFact.setAccessToken = function(accessToken) {
+        authFact.authToken = accessToken;
+    };
+
+    authFact.getAccessToken = function() {
+        return authFact.authToken;
+    };
+
+    return authFact;
 
 }]);
 
@@ -232,9 +269,54 @@ app.service('ServiciosService', ['AirtableService', function(AirtableService) {
     };
 }]); // fin de Servicios Service
 
-app.controller('InicioSesionCtrl', ['$scope', function ($scope) {
+
+app.service('UsuariosService', ['AirtableService', function(AirtableService) {
+
+    this.getUser = function(email) {
+        
+        var base = AirtableService.getBase();
+        
+        return base('Usuarios').select({
+            view: 'Grid view',
+            filterByFormula: '(email = "'+email+'")'
+        }).all();
+    };
+
+}]); // fin de Usuarios Service
+
+
+app.controller('InicioSesionCtrl', ['$scope', '$rootScope', 'UsuariosService', "authFact", "$location", function ($scope, $rootScope, UsuariosService, authFact, $location) {
+
+    $scope.usuario = {};
+    $rootScope.isAuthorized = false;
+    $scope.malaAutenticacion = false;
+
+    $scope.checkUsuario = function() {
+        UsuariosService.getUser($scope.usuario.email).then(function(value){
+            if (value.length > 0) {
+                if (value[0].fields.password == $scope.usuario.password) {
+                    authFact.setAccessToken(value[0].fields.user);
+
+                    $location.path("/citas");
+                    $rootScope.isAuthorized = true;
+                    $scope.$apply();
+                }
+                else {
+                    $scope.malaAutenticacion = true;
+                    $scope.usuario.password = '';
+                }
+            } else {
+                $scope.malaAutenticacion = true;
+                $scope.usuario.email = '';
+                $scope.usuario.password = '';
+            }
+            $scope.$apply();
+        });
+    }
 
 }]);
+
+
 app.controller('InicioCtrl', ['$scope', function ($scope) {
 
 }]);
@@ -404,9 +486,11 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
             $scope.citaNueva.fecha.setHours(horas,minutos,0,0);
             CitasService.add($scope.citaNueva).then(function(value){
                 if (value.id) {
-                    console.log("Cita agregada con éxito");
+                    alert("Cita agregada con éxito");
+                } else {
+                    alert('Error al crear la cita');
+                    console.log(value);
                 }
-                console.log(value);
             });
         }
         $location.path( '/citas' );

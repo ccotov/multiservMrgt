@@ -1,1 +1,32 @@
-<p>Inicio Sesion</p>
+<div class="container-fluid">
+	
+	<div class="row">
+		
+		<div class="col-md-6 col-md-offset-3">
+
+			<h2 class="sub-header">Inicio de Sesión</h2>
+
+			<form class="form-horizontal" name="sesionForm" ng-submit="checkUsuario()">
+			 	<div class="form-group">
+			    	<label for="email" class="col-sm-3 control-label">Usuario</label>
+			    	<div class="col-sm-9">
+			    		<input name="email" ng-model="usuario.email" required type="email" class="form-control" placeholder="Email" required>
+			    		<span STYLE="color: red; font-size: 10pt" ng-show="sesionForm.email.$invalid">* Formato de email inválido</span>
+			    	</div>
+			  	</div>
+				<div class="form-group">
+			    	<label for="password" class="col-sm-3 control-label">Contraseña</label>
+			    	<div class="col-sm-9">
+			    		<input name="password" ng-model="usuario.password" required type="password" class="form-control" placeholder="Contraseña" required>
+			    	</div>
+			    	<span class="col-sm-12" STYLE="color: red; font-size: 12pt; padding-left: 30px;;top: 10px;" ng-show="malaAutenticacion && (sesionForm.$invalid || usuario.password === '')">* Usuario y/o contraseña inválidos</span>
+			  	</div>
+			  	<div class="form-group">
+			    	<div class="col-sm-offset-3 col-sm-9">
+			      		<button type="submit" ng-disabled="sesionForm.$invalid" class="btn btn-default">Ingresar</button>
+			    	</div>
+			  	</div>
+			</form>
+		</div>
+	</div>
+</div>
