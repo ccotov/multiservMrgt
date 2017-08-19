@@ -338,7 +338,7 @@ app.controller('CitasCtrl', ['$scope', 'CitasService', '$location', '$route', fu
         if (confirmBorrar) {
             CitasService.borrar(cita.id).then(function(){
                 alert("Cita eliminada");
-                $route.reload();  
+                $location.path( '/citas' );
             });
         }
         
@@ -430,7 +430,7 @@ app.controller('CitaCtrl', ['$scope', 'ClientesService', 'CitasService', 'Servic
                 var fechaCompl = new Date(item.fields.Fecha);
                 var hora = fechaCompl.getHours() +':'+ ('0'+fechaCompl.getMinutes()).slice(-2);
                 var timeReq = $scope.getTiempoServicio(item.fields.Tipo[0]);
-                $scope.setNoDisponible( hora, timeReq );
+//                $scope.setNoDisponible( hora, timeReq );
             });
             $scope.isContenidoCargado = true;
             $scope.$apply();
